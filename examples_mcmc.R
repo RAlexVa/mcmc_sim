@@ -43,6 +43,7 @@ distributions <- list(Q1,Q2,Q3) #List with the distributions to consider
 ##### Measuring performance of Metropolis Hastings #####
 time_mcmc <- array(0,dim=c(N,length(size),3)) #array to store execution time
 tvd <- array(0,dim=c(N,length(size),3)) #array to store values of TVD
+print('Metropolis Hastings simulation')
 #progress bar 
 #https://r-coder.com/progress-bar-r/#:~:text=Insert%20progress%20bar,-The%20txtProgressBar%20function&text=The%20most%20common%20functions%20used,arguments%20that%20you%20can%20customize.
 pb <- txtProgressBar(min = 0,max = N,style = 3,width = 50,char = "=") 
@@ -70,7 +71,7 @@ write.csv(result,paste0("MH_sim_",Sys.Date(),'.csv'))
 ##### Measuring performance of rejection free MH #####
 time_mcmc <- array(0,dim=c(N,length(size),3))
 tvd <- array(0,dim=c(N,length(size),3))
-
+print('Rejection Free MH simulation')
 pb <- txtProgressBar(min = 0,max = N,style = 3,width = 50,char = "=") #progress bar  
 for(r in 1:N){# Times to repeat each experiment to get an average of TVD and time
   for(k in 1:length(size)){
@@ -100,7 +101,7 @@ write.csv(result,paste0("RF_sim_",Sys.Date(),'.csv'))
 time_mcmc <- array(0,dim=c(N,length(size),3))
 tvd <- array(0,dim=c(N,length(size),3))
 temps <- c(1,2,3.5,5)
-
+print('Parallel tempering simulation')
 pb <- txtProgressBar(min = 0,max = N,style = 3,width = 50,char = "=") #progress bar  
 for(r in 1:N){# Times to repeat each experiment to get an average of TVD and time
   for(k in 1:length(size)){
