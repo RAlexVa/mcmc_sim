@@ -1,38 +1,37 @@
 library(tidyverse)
 library(visNetwork)
 library(networkD3)
-library(RColorBrewer) 
-# brew10 <- brewer.pal(10, "Set3")
-# 
-# col.dist <- function(inp, comp) sum( abs(inp - col2rgb(comp) ) )
-# colors()[ apply(col2rgb(brew10), 2, 
-#                 function(z) which.min( sapply(colors(), 
-#                                               function(x) col.dist(inp=z, comp=x) ) ) ) ]
-# 
-# 
 
-nodes <- data.frame(id = 1:3, 
-                    label = c("  A  ", "  B  ", "  C  "),                                 # add labels on nodes
-                    x = c(-50, 50, 0),
-                    y = c(-30, -30, 30),
-                    group = c("pi(A) = 1/6", "pi(B) = 2/6", "pi(C) = 3/6"),            # add groups on nodes 
+nodes <- data.frame(id = 1:5, 
+                    label = c("  A  ", "  B  ", "  C  ", "  D  ", "  E  "),                                 # add labels on nodes
+                    x = c(0,50,20,-20,-50),
+                    y = c(30,0,-30,-30,0),
+                    group = c("pi(A) = 1", "pi(B) = 1", "pi(C) = e^3", "pi(D) = 1", "pi(E) = e^5"),            # add groups on nodes 
                     #value = rep(10^1000, 3),                                   # size adding value
-                    shape = c("circle", "circle", "circle"),                  # control shape of nodes
-                    color = c("moccasin", "lightsteelblue", "salmon"),# color
-                    shadow = rep(FALSE, 3))                  # shadow
+                    shape = c("circle", "circle", "circle", "circle", "circle"),                  # control shape of nodes
+                    color = c("moccasin", "lightsteelblue", "salmon", "darkseagreen", "darkorchid"),# color
+                    shadow = rep(FALSE, 5))                  # shadow
 
-nodes
-edges <- data.frame(from = c(1, 2, 3), 
-                    to = c(2, 3, 1),
-                    label = c(rep(" ", 3)),
-                    dashes = c(FALSE, FALSE, FALSE), 
-                    color = c(rep("black", 3)),
-                    shadow = rep(FALSE, 3))                    
-edges
+# edges <- data.frame(from = c(1,2,3,4,5), 
+#                     to = c(2,3,4,5,1),
+#                     label = c(rep(" ", 5)),
+#                     dashes = c(rep(FALSE, 5)), 
+#                     color = c(rep("black", 5)),
+#                     shadow = rep(FALSE, 5))                    
 
-visNetwork(nodes, edges, width = "100%") %>%
-   visNodes(fixed = TRUE) %>%
-   visGroups(groupname = "pi(A) = 1/6", color = "moccasin", shape = "circle", value = 1) %>%
-   visGroups(groupname = "pi(B) = 2/6", color = "lightsteelblue", shape = "circle", value = 1) %>%
-   visGroups(groupname = "pi(C) = 3/6", color = "salmon", shape = "circle", value = 1) %>%
+edges <- data.frame(from = combn(5,2)[1,], 
+                    to = combn(5,2)[2,])
+edges$label <- " "
+edges$dashes <- FALSE
+edges$color <- "black"
+edges$shadow <- FALSE
+
+  visNetwork(nodes, edges, width = "100%") %>%
+   #visNodes(fixed = TRUE) %>%
+   visGroups(groupname = "pi(A) = 1", color = "moccasin", shape = "circle", value = 1) %>%
+   visGroups(groupname = "pi(B) = 1", color = "lightsteelblue", shape = "circle", value = 1) %>%
+   visGroups(groupname = "pi(C) = e^3", color = "salmon", shape = "circle", value = 1) %>%
+   visGroups(groupname = "pi(D) = 1", color = "darkseagreen", shape = "circle", value = 1) %>%
+   visGroups(groupname = "pi(E) = e^5", color = "darkorchid", shape = "circle", value = 1) %>%
    visLegend(useGroups = TRUE, position = "right", main = "Target Density Values") 
+  
