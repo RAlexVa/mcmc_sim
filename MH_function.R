@@ -38,7 +38,7 @@ mh_sim <- function(S,initial,B,M,pi,Q){
 #   if(!(i %in% S)){print(paste("State",i,"is not in S"));return(NA)}else{#Check that state i is in S
 #     if(adj < 0){print("adj parameter must be non-negative"); return(NA)}else{
 #       if(adj == 0){ #Consider all neighbors
-#         neighbors <- S[S!=i]  
+#         neighbors <- S[S!=i]
 #       }else{ #Consider the number of adjacent neighbors defined by adj
 #         index <- which(i==S) - 1 #index of the current state
 #         adj_index <- c(-adj:-1,1:adj)
@@ -50,9 +50,7 @@ mh_sim <- function(S,initial,B,M,pi,Q){
 #       prob <- rep(1/n_size,n_size)
 #       return(cbind(neighbors,prob))
 #     }
-#   } 
-# 
-# 
+#   }
 # }
 # ex <- mh_sim(S,1,50,10000,pi,Q_unif)
 # compare <- tibble(sim=table(ex)/length(ex), target=pi/sum(pi),diff=abs(target-sim))
