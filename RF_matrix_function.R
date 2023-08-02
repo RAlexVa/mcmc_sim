@@ -2,12 +2,12 @@
 
 ##### PARAMETERS #####
 #INPUT
-# S : State space
-# initial : Initial state of the chain
-# B : Burn-in to consider
-# M : Number of sample size to simulate (after burn-in)
-# pi: target distribution
-# Q: proposal distribution
+# S : Finite state space
+# initial : (element of S) Initial state of the chain
+# B : (int) Burn-in to consider
+# M : (int) Number of sample size to simulate (after burn-in)
+# pi: (vector) target distribution
+# Q: (matrix) proposal distribution
 #OUTPUT
 # tibble
 # mul is the multiplicity
@@ -22,7 +22,7 @@
 # list
 # alpha is the probability of escaping each state
 # matrix is the new transition probabilities (considering that the chain always escapes from the current state)
-alpha_p <- function(pi, Q){
+alpha_p_M <- function(pi, Q){
   #pi doesn't need to be normalized
   qQ <- t(Q)/Q #Quotient of Q(j,i)/Q(i,j)
   diag(qQ) <- 0 #Set the diagonal to 0
@@ -41,7 +41,7 @@ mh_jump <- function(S,initial,B,M,pi,Q){
   state <- c() #Initialize vector to store the sample
   multi <- c() #Initialize multiplicity chain
   state[1] <- initial #initial state
-  esc_p <- alpha_p(pi,Q) #Obtain the escape probability and the transition prob.
+  esc_p <- alpha_p_M(pi,Q) #Obtain the escape probability and the transition prob.
   i <- 1 #initialize the index for the state and multi vectors
   #burn-in steps  
   while(sum(multi)<B){
