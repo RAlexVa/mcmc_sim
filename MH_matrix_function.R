@@ -3,18 +3,18 @@
 
 ##### Parameters #####
 #INPUT
-# S : State space
-# initial : Initial state of the chain
-# B : Burn-in to consider
-# M : Number of sample size to simulate (after burn-in)
-# pi: target distribution
-# Q: proposal distribution
+# S : Finite state space
+# initial : (element of S) Initial state of the chain
+# B : (int) Burn-in to consider
+# M : (int) Number of sample size to simulate (after burn-in)
+# pi: (vector) target distribution
+# Q: (Matrix) proposal distribution
 #OUTPUT
-# vector of size 
+# vector of size M 
 
 
 ##### Function #####
-mh_sim <- function(S,initial,B,M,pi,Q){
+mh_sim_M <- function(S,initial,B,M,pi,Q){
   state <- c() #Initialize vector to store the sample
   state[1] <- initial #initial state
   for(i in 1:(M+B)){ #burn-in steps + sample size
@@ -32,7 +32,7 @@ mh_sim <- function(S,initial,B,M,pi,Q){
 # #Q(i,j) ∝ 1
 # Q <- matrix(1/length(S),ncol=length(S),nrow=length(S))
 # diag(Q) <- 0
-# ex <- mcmc_sim(S,1,50,10000,pi,Q)
+# ex <- mh_sim_M(S,1,50,10000,pi,Q)
 # compare <- tibble(sim=table(ex)/length(ex), target=pi/sum(pi),diff=abs(target-sim))
 # #TVD
 # 0.5*sum(compare$diff)
