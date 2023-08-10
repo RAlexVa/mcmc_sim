@@ -65,9 +65,11 @@ mh_sim <- function(S,initial,B,M,pi,Q){
 }
 
 #### Example #####
+{
 # S <- 1:5 #State space
 # pi <- exp(S/2) #Proportions of target distribution
 # ex <- mh_sim(S,1,50,10000,pi,Q_unif)
 # compare <- tibble(sim=table(ex)/length(ex), target=pi/sum(pi),diff=abs(target-sim))
 # #TVD
 # 0.5*sum(compare$diff)
+}

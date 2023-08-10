@@ -139,17 +139,20 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q){
 }
 
 #### Example #####
-library(dplyr)
-set.seed(123)
-S <- 1:10 #State space
-pi <- exp((S-1)/2) #Proportions of target distribution
-ex <- PNS_unbiased(S,1,10000*200,200,pi,Q_unif)
-est_prob <- ex |> #estimate the probability
-  group_by(sample) |>
-  summarize(fre = sum(mul)) |>
-  mutate(prob = fre/sum(fre)) |>
-  pull(prob)
+{
+  # library(dplyr)
+  # set.seed(123)
+  # S <- 1:10 #State space
+  # pi <- exp((S-1)/2) #Proportions of target distribution
+  # ex <- PNS_unbiased(S,1,10000*200,200,pi,Q_unif)
+  # est_prob <- ex |> #estimate the probability
+  #   group_by(sample) |>
+  #   summarize(fre = sum(mul)) |>
+  #   mutate(prob = fre/sum(fre)) |>
+  #   pull(prob)
+  # 
+  # compare <- tibble(sim=est_prob, target=pi/sum(pi),diff=abs(target-sim))
+  # #TVD
+  # 0.5*sum(compare$diff)
+}
 
-compare <- tibble(sim=est_prob, target=pi/sum(pi),diff=abs(target-sim))
-#TVD
-0.5*sum(compare$diff)

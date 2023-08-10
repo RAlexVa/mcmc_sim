@@ -113,12 +113,12 @@ mh_jump <- function(S,initial,B,M,pi,Q,adj=0){
 }
 
 # #### Example #####
+{
 # library(dplyr)
 # set.seed(123)
 # S <- 1:5 #State space
 # pi <- exp(S/2) #Proportions of target distribution
-
-# ex <- mh_jump(S,1,50,10000,pi,Q)
+# ex <- mh_jump(S,1,50,10000*200,pi,Q)
 # est_prob <- ex |> #estimate the probability
 #   group_by(sample) |>
 #   summarize(fre = sum(mul)) |>
@@ -128,3 +128,4 @@ mh_jump <- function(S,initial,B,M,pi,Q,adj=0){
 # compare <- tibble(sim=est_prob, target=pi/sum(pi),diff=abs(target-sim))
 # #TVD
 # 0.5*sum(compare$diff)
+}
