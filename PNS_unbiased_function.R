@@ -63,7 +63,7 @@ Q_unif <- function(i,S, adj=0, nbr=NA){
 # Matrix
 # 1st column is the neighbor
 # 2nd column is the ptobability of moving from state X to the state in that row
-alpha_pns <- function(x,S,pi,Q,nbr=NA){
+alpha_pns <- function(x,S,pi,Q,nbr=S){
   n_x <- Q(x,S,adj=0) #Obtain uniform probabilities considering all neighbors
   p_esc <- matrix(NA,ncol=2)
   for(y in intersect(n_x[,1],nbr)){
