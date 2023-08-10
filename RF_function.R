@@ -117,7 +117,7 @@ mh_jump <- function(S,initial,B,M,pi,Q){
 # set.seed(123)
 # S <- 1:5 #State space
 # pi <- exp(S/2) #Proportions of target distribution
-# ex <- mh_jump(S,1,50,10000*200,pi,Q)
+# ex <- mh_jump(S,1,50,10000,pi,Q_unif)
 # est_prob <- ex |> #estimate the probability
 #   group_by(sample) |>
 #   summarize(fre = sum(mul)) |>
