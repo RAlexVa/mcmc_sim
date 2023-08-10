@@ -63,11 +63,11 @@ Q_unif <- function(i,S, adj=0, nbr=NA){
 # Matrix
 # 1st column is the neighbor
 # 2nd column is the ptobability of moving from state X to the state in that row
-alpha_p <- function(x,S,pi,Q, adj=0, nbr=NA){
-  n_x <- Q(x,S,adj,nbr)
+alpha_pns <- function(x,S,pi,Q,nbr=NA){
+  n_x <- Q(x,S,adj=0) #Obtain uniform probabilities considering all neighbors
   p_esc <- matrix(NA,ncol=2)
-  for(y in n_x[,1]){
-    n_y <- Q(y,S,adj)
+  for(y in intersect(n_x[,1],nbr)){
+    n_y <- Q(y,S,adj=0)
     index_x <- which(n_y[,1]==x)
     index_y <- which(n_x[,1]==y)
     prob <- n_x[index_y,2]*min(1,(pi[y]*n_y[index_x,2])/(pi[x]*n_x[index_y,2]))
@@ -118,11 +118,11 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q){
     
     #Select the next set of neighbors
     # neighbors <- total_neighbors[,n_count%%ncol(total_neighbors) + 1]
-    neighbors <- NBR_adj(state[i+1],S,prop=0.5)
+     neighbors <- NBR_adj(state[i+1],S,prop=0.7)
     if(sum(multi) + L >=M){l_count <- M-sum(multi); last <- TRUE}
     while(l_count >0){ #loop for changing PNSets
       i <- i+1
-      esc_p <- alpha_p(state[i],S,pi,Q,nbr=neighbors) #Obtain the escape probability and the transition prob for all neighbors
+      esc_p <- alpha_pns(state[i],S,pi,Q,nbr=neighbors) #Obtain the escape probability and the transition prob for all neighbors
       s_rep <- 1 + rgeom(1,sum(esc_p[,2])) #Get the multiplicity for the current state
       if(s_rep>=l_count){ #Stop when you get L samples from that neighborhood
         multi[i] <- l_count #Stay in that state the remaining number of steps
