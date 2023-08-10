@@ -52,9 +52,9 @@ mh_sim <- function(S,initial,B,M,pi,Q){
   state <- c() #Initialize vector to store the sample
   state[1] <- initial #initial state
   for(i in 1:(M+B)){ #burn-in steps + sample size
-    n_i <- Q(state[i],S,adj=0) #Considering all neighbors of state i
+    n_i <- Q(state[i],S) #Considering the proposal distribution Q
     j <- sample(n_i[,1], 1,prob=n_i[,2]) #sample from the neighbors
-    n_j <- Q(j,S,adj=0) #Neighbors of state j (the proposed state)
+    n_j <- Q(j,S) #Neighbors of state j (the proposed state)
     index_i <- which(n_j[,1]==state[i])
     index_j <- which(n_i[,1]==j)
     if (runif(1)< (pi[j]*n_j[index_i,2]/(pi[state[i]]*n_i[index_j,2]))){ #Check probability to accept or reject
