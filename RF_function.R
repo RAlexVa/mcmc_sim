@@ -55,16 +55,15 @@ Q_unif <- function(i,S, adj=0, nbr=NA){
 # S: state space
 # pi: target distribution
 # Q: (function) proposal distribution
-# adj: paramater for function Q
 #OUTPUT
 # Matrix
 # 1st column is the neighbor
 # 2nd column is the ptobability of moving from state X to the state in that row
-alpha_p <- function(x,S,pi,Q, adj=0, nbr=NA){
-  n_x <- Q(x,S,adj,nbr)
+alpha_p <- function(x,S,pi,Q){
+  n_x <- Q(x,S)
   p_esc <- matrix(NA,ncol=2)
   for(y in n_x[,1]){
-    n_y <- Q(y,S,adj)
+    n_y <- Q(y,S)
     index_x <- which(n_y[,1]==x)
     index_y <- which(n_x[,1]==y)
     prob <- n_x[index_y,2]*min(1,(pi[y]*n_y[index_x,2])/(pi[x]*n_x[index_y,2]))
@@ -75,14 +74,14 @@ alpha_p <- function(x,S,pi,Q, adj=0, nbr=NA){
 }
 
 ##### FUNCTION #####
-mh_jump <- function(S,initial,B,M,pi,Q,adj=0){
+mh_jump <- function(S,initial,B,M,pi,Q){
   state <- c() #Initialize vector to store the sample
   multi <- c() #Initialize multiplicity chain
   state[1] <- initial #initial state
   i <- 1 #initialize the index for the state and multi vectors
   #burn-in steps  
   while(sum(multi)<B){
-    esc_p <- alpha_p(state[i],S,pi,Q,adj) #Obtain the escape probability and the transition prob.
+    esc_p <- alpha_p(state[i],S,pi,Q) #Obtain the escape probability and the transition prob.
     s_rep <- 1 + rgeom(1,sum(esc_p[,2])) #Get the multiplicity for the current state
     if((sum(multi) + s_rep)>B){ #If the chain would remain more than the burn-in
       multi[i] <- B - sum(multi) #Stay in that state the remaining number of steps
@@ -98,7 +97,7 @@ mh_jump <- function(S,initial,B,M,pi,Q,adj=0){
   burnin <- length(multi) #this identifies at which index we got the burn-in sample
   #Sampling steps
   while(sum(multi)<(B+M)){
-    esc_p <- alpha_p(state[i],S,pi,Q,adj) #Obtain the escape probability and the transition prob.
+    esc_p <- alpha_p(state[i],S,pi,Q) #Obtain the escape probability and the transition prob.
     s_rep <- 1 + rgeom(1,sum(esc_p[,2])) #Get the multiplicity for the current state
     if((sum(multi) + s_rep)>=(B+M)){ #If the chain would remain more than the burn-in
       multi[i] <- (B+M) - sum(multi) #Stay in that state the remaining number of steps
