@@ -52,13 +52,13 @@ Q_unif <- function(i,S, adj=0, nbr=NA){
 
 
 ##### AID FUNCTION #####
-#Function to calculate the probability of escaping a state
+#Function to calculate the probability of escaping a state in the PNS setting
 #INPUT
 # x: state to calculate escape probability
 # S: state space
 # pi: target distribution
 # Q: (function) proposal distribution
-# adj: paramater for function Q
+# nbr: Neighbors to consider
 #OUTPUT
 # Matrix
 # 1st column is the neighbor
