@@ -64,7 +64,7 @@ Q_unif <- function(i,S, adj=0, nbr=NA){
 # 1st column is the neighbor
 # 2nd column is the ptobability of moving from state X to the state in that row
 alpha_pns <- function(x,S,pi,Q,nbr=S){
-  n_x <- Q(x,S,adj=0) #Obtain uniform probabilities considering all neighbors
+  n_x <- Q(x,S,adj=0) #Obtain transition probabilities considering all neighbors
   p_esc <- matrix(NA,ncol=2)
   for(y in intersect(n_x[,1],nbr)){
     n_y <- Q(y,S,adj=0)
@@ -77,35 +77,6 @@ alpha_pns <- function(x,S,pi,Q,nbr=S){
   return(p_esc) 
 }
 
-NBR_adj <- function(x,S,nbr){
-      if(nbr%%2==1){
-        right <- (nbr+1)/2
-        left <- (nbr-1)/2
-      }else{
-        right <- nbr/2
-        left <- right
-      }
-      side_i <- c(-left:0,1:right)
-      neighbors <- S[(x-1 + side_i)%%(length(S)) +1]
-      return(unique(neighbors))
-}
-NBR_comp <- function(S,parts=2){
-  residual <- length(S)%%parts
-  size <- ceiling((length(S)-residual)/parts)
-  neighbors <- matrix(NA,ncol=parts, nrow=size+residual)
-  for(i in 1:parts){
-      vec <- c(S[(size*(i-1) +1):(size*i)],rep(NA,residual))
-      neighbors[,i] <- vec
-  }
-  if(residual>0){
-    neighbors[-(1:size),parts] <- S[(size*parts+1):length(S)]
-  }
-  return(neighbors)
-}
-NBR_bias <- function(x,S,prop,bias=1){
-  neighbors <- NBR_adj(x,S,prop)
-  return(unique(c(neighbors,bias)))
-}
 ##### FUNCTION #####
 PNS_unbiased <- function(S,initial,M,L,pi,Q,nbr_func){
   state <- c() #Initialize vector to store the sample
@@ -115,19 +86,14 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q,nbr_func){
   n_count <- 0 #change of neighbor count
   last <- FALSE #flag for the last iteration
   
-  # #Definition of neighbor sets
-  # total_neighbors <- NBR_comp(S)
   while(sum(multi)<M){ #loop for the sample
-    l_count <- L
-    n_count <- n_count + 1
-    
-    #Select the next set of neighbors
-    # neighbors <- total_neighbors[,n_count%%ncol(total_neighbors) + 1]
-     neighbors <- nbr_func(state[i+1])
+    l_count <- L #Reseting the L to change neighborhoods
     if(sum(multi) + L >=M){l_count <- M-sum(multi); last <- TRUE}
     while(l_count >0){ #loop for changing PNSets
       i <- i+1
-      esc_p <- alpha_pns(state[i],S,pi,Q,nbr=neighbors) #Obtain the escape probability and the transition prob for all neighbors
+      neighbors <- nbr_func(state[i]) #calculate neigborhoods of current state
+      PNSet <- neighbors[[(n_count%%length(neighbors))+1]] #Select the negihborhood depending on L
+      esc_p <- alpha_pns(state[i],S,pi,Q,nbr=PNSet) #Obtain the escape probability and the transition prob for the partial neighbors
       s_rep <- 1 + rgeom(1,sum(esc_p[,2])) #Get the multiplicity for the current state
       if(s_rep>=l_count){ #Stop when you get L samples from that neighborhood
         multi[i] <- l_count #Stay in that state the remaining number of steps
@@ -139,6 +105,8 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q,nbr_func){
         l_count <- l_count - s_rep
       }
     }
+    #After finishing this loop we'll reset L
+    n_count <- n_count + 1 #Count how many times we've restarted the L
   }
   return(tibble(mul=multi, sample=state)) 
 }
@@ -147,10 +115,22 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q,nbr_func){
 {
   # library(dplyr)
   # set.seed(123)
-  # S <- 1:10 #State space
+  # S <- 1:5 #State space
   # pi <- exp((S-1)/2) #Proportions of target distribution
-  # pns_adj <- function(x){NBR_adj(x,S,nbr=4)}
-  # ex <- PNS_unbiased(S,1,10000,100,pi,Q_unif,pns_adj)
+  # pns_func <- function(x){
+  #   indx <- which(S==x)
+  #   n1 <- c(-1,0,1)
+  #   n2 <- c(-2,0,2)
+  #   n1 <- unique(S[((indx-1)+n1)%%length(S)+1])
+  #   n2 <- unique(S[((indx-1)+n2)%%length(S)+1])
+  #   if(!all(S%in%unique(c(n1,n2)))){
+  #     print("Neighborhoods not covering S")
+  #     return(NA)
+  #   }else{
+  #     return(list(n1,n2))
+  #   }
+  # }
+  # ex <- PNS_unbiased(S,1,10000,100,pi,Q_unif,pns_func)
   # est_prob <- ex |> #estimate the probability
   #   group_by(sample) |>
   #   summarize(fre = sum(mul)) |>
