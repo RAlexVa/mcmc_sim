@@ -9,7 +9,7 @@
 # pi: (vector) target distribution
 # Q: (function) proposal distribution
 # L: (int) Number of samples to obtain for each PNSet
-# NBR: (function) Function to select the Partial Neighbors of a state
+# nbr_func: (function) Function to select the Partial Neighbors of a state
 #OUTPUT
 # tibble
 # mul is the multiplicity
@@ -107,7 +107,7 @@ NBR_bias <- function(x,S,prop,bias=1){
   return(unique(c(neighbors,bias)))
 }
 ##### FUNCTION #####
-PNS_unbiased <- function(S,initial,M,L,pi,Q){
+PNS_unbiased <- function(S,initial,M,L,pi,Q,nbr_func){
   state <- c() #Initialize vector to store the sample
   multi <- c() #Initialize multiplicity chain
   state[1] <- initial #initial state
@@ -123,7 +123,7 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q){
     
     #Select the next set of neighbors
     # neighbors <- total_neighbors[,n_count%%ncol(total_neighbors) + 1]
-     neighbors <- NBR_adj(state[i+1],S,prop=0.7)
+     neighbors <- nbr_func(state[i+1])
     if(sum(multi) + L >=M){l_count <- M-sum(multi); last <- TRUE}
     while(l_count >0){ #loop for changing PNSets
       i <- i+1
