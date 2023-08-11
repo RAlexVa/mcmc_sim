@@ -86,28 +86,81 @@ write.csv(result,paste0("simulation results/RF_sim_",Sys.Date(),".csv"))
 ##### Simulation Partial Neighbor Search #####
 
 #PNSets to consider
-PNS1 <- function(x){NBR_adj(x,S,nbr=2)} #Uniform considering only 1 adjacent neighbor
-PNS2 <- function(x){NBR_adj(x,S,nbr=4)} #Uniform considering x adjacent neighbors
-PNS3 <- function(x){NBR_adj(x,S,nbr=6)}
-PNS4 <- function(x){NBR_adj(x,S,nbr=8)}
-PNSets <- list(PNS1,PNS2,PNS3,PNS4)
+#PNSets depend on the specific state space S 
+#so this functions only work with |S|=10
+
+PNS_def <- function(x,S,n1,n2){
+  indx <- which(S==x)
+  n1 <- unique(S[((indx-1)+n1)%%length(S)+1])
+  n2 <- unique(S[((indx-1)+n2)%%length(S)+1])
+  if(!all(S%in%unique(c(n1,n2)))){
+    print("Neighborhoods not covering S")
+    return(NA)
+  }else{
+    return(list(n1,n2))
+  }
+  
+}
+PNS_3 <- function(x,ni){
+  neigh <- PNS_def(x,S,c(0,-2,2,5),c(0,1,3,4,-1,-3,-4))
+  return(neigh[[ni]])
+}
+PNS_4 <- function(x,ni){
+  neigh <- PNS_def(x,S,c(0,-2,-4,2,4),c(0,1,3,5,-1,-3))
+  return(neigh[[ni]])
+}
+PNS_near <- function(x,ni){
+  neigh <- PNS_def(x,S,c(0,-1,-2,1,2),c(0,3,4,5,-3,-4))
+  return(neigh[[ni]])
+}
+PNS_5 <- function(x,S,ni){
+  indx <- which(S==x)
+  n1 <- c(0,-2,2,5)
+  n2 <- c(0,-1,1)
+  n3 <- c(0,-3,-4,3,4)
+  n1 <- unique(S[((indx-1)+n1)%%length(S)+1])
+  n2 <- unique(S[((indx-1)+n2)%%length(S)+1])
+  n3 <- unique(S[((indx-1)+n3)%%length(S)+1])
+  n_list <- list(n1,n2,n3)
+  if(!all(S%in%unique(c(n1,n2,n3)))){
+    print("Neighborhoods not covering S")
+    return(NA)
+  }else{
+    return(n_list[[ni]])
+  }
+  
+}
+
+PNSets <- list(PNS_3,PNS_4,PNS_near,PNS_5)
 
 #parameters
 L <- 50
 PNS_time_mcmc <- array(0,dim=c(N,length(M),length(PNSets))) #array to store execution time
 PNS_tvd <- array(0,dim=c(N,length(M),length(PNSets))) #array to store values of TVD
-
+no_sample <- c()
 for(n in 1:N){ #number of simulations
   for(m in 1:length(M)){ #considering different sample sizes
     for(q in 1:length(PNSets)){#distinct proposal distributions
       start_time <- Sys.time()
       simulation <- PNS_unbiased(S,3,M[m],L,pi,Q_unif,PNSets[[q]])
       PNS_time_mcmc[n,m,q] <- Sys.time() - start_time #record the time it took to run the simulation
-      est_prob <- simulation |> #estimate the probability
-        group_by(sample) |> 
-        summarize(fre = sum(mul)) |> 
-        mutate(prob = fre/sum(fre)) |> 
-        pull(prob) 
+      states_w_sample <- length(unique(simulation$sample))
+      if(states_w_sample<10){ #In case there was a state with no sample
+        no_sample <- c(no_sample,paste0(states_w_sample,' states with no sample, N:',n,' M:',M[m],' Q:',q ))
+        simulation <- rbind(simulation,tibble(sample=S,mul=rep(1,length(S)))) #Add 1 to each state (to avoid states with 0 sample)
+        est_prob <- simulation |> #estimate the probability
+          group_by(sample) |> 
+          summarize(fre = sum(mul)) |> 
+          mutate(fre = fre-1) |> #Delete the additional sample added to avoid states with no 
+          mutate(prob = fre/sum(fre)) |> 
+          pull(prob) 
+      }else{
+        est_prob <- simulation |> #estimate the probability
+          group_by(sample) |> 
+          summarize(fre = sum(mul)) |> 
+          mutate(prob = fre/sum(fre)) |> 
+          pull(prob) 
+      }
       PNS_tvd[n,m,q] <- 0.5*sum(abs(true_pi - est_prob))
     }
   }
@@ -121,4 +174,4 @@ colnames(result) <- c(paste0('TVD Q',1:length(PNSets)),paste0('Time Q',1:length(
 rownames(result) <- paste0("S=",M)
 
 write.csv(result,paste0("simulation results/PNS_sim_",Sys.Date(),".csv"))
-
+write.csv(no_sample,paste0("simulation results/PNS_no sample_",Sys.Date(),".csv"),row.names = F)
