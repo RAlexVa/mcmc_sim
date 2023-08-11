@@ -77,10 +77,15 @@ alpha_pns <- function(x,S,pi,Q,nbr=S){
   return(p_esc) 
 }
 
-NBR_adj <- function(x,S,prop){
-  size=ceiling(length(S)*prop)
-      side <- ceiling((size-1)/2)
-      side_i <- c(-side:0,1:side)
+NBR_adj <- function(x,S,nbr){
+      if(nbr%%2==1){
+        right <- (nbr+1)/2
+        left <- (nbr-1)/2
+      }else{
+        right <- nbr/2
+        left <- right
+      }
+      side_i <- c(-left:0,1:right)
       neighbors <- S[(x-1 + side_i)%%(length(S)) +1]
       return(unique(neighbors))
 }
