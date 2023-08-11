@@ -149,7 +149,8 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q,nbr_func){
   # set.seed(123)
   # S <- 1:10 #State space
   # pi <- exp((S-1)/2) #Proportions of target distribution
-  # ex <- PNS_unbiased(S,1,10000*200,200,pi,Q_unif)
+  # pns_adj <- function(x){NBR_adj(x,S,nbr=4)}
+  # ex <- PNS_unbiased(S,1,10000,100,pi,Q_unif,pns_adj)
   # est_prob <- ex |> #estimate the probability
   #   group_by(sample) |>
   #   summarize(fre = sum(mul)) |>
