@@ -65,7 +65,7 @@ for(n in 1:N){ #number of simulations
       time_mcmc[n,m,q] <- Sys.time() - start_time #record the time it took to run the simulation
       states_w_sample <- length(unique(simulation$sample))
       if(states_w_sample<length(S)){ #In case there was a state with no sample
-        no_sample <- c(no_sample,paste0(states_w_sample,' states with no sample, N:',n,' M:',M[m],' Q:',q ))
+        no_sample <- c(no_sample,paste0(length(S)-states_w_sample,' states with no sample, N:',n,' M:',M[m],' Q:',q ))
         simulation <- rbind(simulation,tibble(sample=S,mul=rep(1,length(S)))) #Add 1 to each state (to avoid states with 0 sample)
         est_prob <- simulation |> #estimate the probability
           group_by(sample) |> 
@@ -93,7 +93,7 @@ colnames(result) <- c(paste0('TVD Q',1:length(dist_q)),paste0('Time Q',1:length(
 rownames(result) <- paste0("S=",M)
 result <- rbind(result,c('Q1 unif on all neighbors', paste0('Q',2:5,' unif on ',1:4,' adjacent neighbors on each side'),rep(NA,length(dist_q))))
 write.csv(result,paste0("simulation results/RF_sim_",Sys.Date(),".csv"))
-write.csv(no_sample,paste0("simulation results/RF_no sample_",Sys.Date(),".csv"),row.names = F)
+if(length(no_sample)>0){write.csv(no_sample,paste0("simulation results/RF_no sample_",Sys.Date(),".csv"),row.names = F)}
 
 ##### Simulation Partial Neighbor Search #####
 
@@ -154,7 +154,7 @@ for(n in 1:N){ #number of simulations
       PNS_time_mcmc[n,m,q] <- Sys.time() - start_time #record the time it took to run the simulation
       states_w_sample <- length(unique(simulation$sample))
       if(states_w_sample<length(S)){ #In case there was a state with no sample
-        no_sample <- c(no_sample,paste0(states_w_sample,' states with no sample, N:',n,' M:',M[m],' PNS:',q ))
+        no_sample <- c(no_sample,paste0(length(S)-states_w_sample,' states with no sample, N:',n,' M:',M[m],' PNS:',q ))
         simulation <- rbind(simulation,tibble(sample=S,mul=rep(1,length(S)))) #Add 1 to each state (to avoid states with 0 sample)
         est_prob <- simulation |> #estimate the probability
           group_by(sample) |> 
@@ -182,4 +182,4 @@ colnames(result) <- c(paste0('TVD PNS',1:length(PNSets)),paste0('Time PNS',1:len
 rownames(result) <- paste0("S=",M)
 
 write.csv(result,paste0("simulation results/PNS_sim_",Sys.Date(),".csv"))
-write.csv(no_sample,paste0("simulation results/PNS_no sample_",Sys.Date(),".csv"),row.names = F)
+if(length(no_sample)>0){write.csv(no_sample,paste0("simulation results/PNS_no sample_",Sys.Date(),".csv"),row.names = F)}
