@@ -49,10 +49,7 @@ ExpEnergy <- function(X, GivenMatrix)
   return(exp(Energy(X, GivenMatrix)))
 }
 
-
-### Given a state, provides the weight of the current state and the next accepted state
-RF_Update_temp <- function(GivenMatrix, XNow, h=h_min, beta=1)
-{
+alpha_temp <- function(GivenMatrix, XNow, h=h_min, beta=1){
   EnergyNow =  Energy(XNow, GivenMatrix,beta) #Energy at current state
   logProb = rep(0, N)
   #Check energy of neighbors
@@ -64,6 +61,13 @@ RF_Update_temp <- function(GivenMatrix, XNow, h=h_min, beta=1)
     EnergyNew = Energy(XNew, GivenMatrix, beta)
     logProb[r] = h(EnergyNew, EnergyNow) #un-normalized probability of accepting the flipping of coordinate r
   }
+  return(logProb)
+}
+
+### Given a state, provides the weight of the current state and the next accepted state
+RF_Update_temp <- function(GivenMatrix, XNow, h=h_min, beta=1)
+{
+  logProb <- alpha_temp(GivenMatrix, XNow, h, beta) #Calculate the logProb vector (contains log probabilities of transitioning from x to all neighbors)
   U = runif(N)
   logD = log(- log(U)) - logProb #Selecting a state proportional to the Prob vector
   #We are simply using the log of the original formula for simplicity.
