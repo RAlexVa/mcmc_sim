@@ -44,9 +44,9 @@ Energy <- function(X, GivenMatrix, beta)
 ### Return the exponential of the energy
 #beta is the inverse temperature
 # beta = 1/T
-ExpEnergy <- function(X, GivenMatrix)
+ExpEnergy <- function(X, GivenMatrix, beta)
 {
-  return(exp(Energy(X, GivenMatrix)))
+  return(exp(Energy(X, GivenMatrix, beta)))
 }
 
 alpha_temp <- function(GivenMatrix, XNow, h=h_min, beta=1){
@@ -80,6 +80,23 @@ RF_Update_temp <- function(GivenMatrix, XNow, h=h_min, beta=1)
   #Z_h is the sum, for all neighbors, of q(y|x) h(pi(y)/pi(x)) since we're using a uniform q(y|x)=1/N we can use the mean 
   #weight = 1/mean(exp(logProb))
   return(list(XNew, EnergyNew))
+}
+
+Replica_swap <- function(GivenMatrix, X1,X2,beta1,beta2){
+  #We use mean since we're using a uniform proposal distribution over all neighbors
+  #We use exp since we're obtaining log probabilities
+  a11 <- mean(exp(alpha_temp(GivenMatrix, X1, h, beta1)))
+  a12 <- mean(exp(alpha_temp(GivenMatrix, X1, h, beta2)))
+  
+  a21 <- mean(exp(alpha_temp(GivenMatrix, X2, h, beta1)))
+  a22 <- mean(exp(alpha_temp(GivenMatrix, X2, h, beta2)))
+  
+  EnergyCurT =  Energy(X1, GivenMatrix,beta1) + Energy(X2, GivenMatrix,beta2)
+  EnergyNewT = Energy(X1, GivenMatrix,beta2) + Energy(X2, GivenMatrix,beta1)
+  accept_logp <- exp(EnergyNewT - EnergyCurT)*a12*a21/(a11*a22)
+  
+  return(accept_logp) #Returns probability of accepting the swap
+  #The probability is corrected for the rejection-free chain
 }
 
 ## h is a vector, we define 1 balancing function for each replica (each temperature)
