@@ -234,10 +234,10 @@ h_max <- function(new,current){
 }
 
 #Big simulation
-N=1000 #Dimension of the QUBO problem
-n_steps= 100000#Number of steps in every simulation
-n_swaps= 1000#After how many steps we try a swap
-NumRep <- 100 #Number of times to repeat the simulation
+N=200 #Dimension of the QUBO problem
+n_steps= 1000000#Number of steps in every simulation
+n_swaps= 8000#After how many steps we try a swap
+NumRep <- 1000 #Number of times to repeat the simulation
 temps <- c(1,1 *1.29^(1:10)) #temperatures
 betas <- 1/temps #Inverse temperatures
 h_baseline <- rep('h_min',length(betas))
