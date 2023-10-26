@@ -186,7 +186,7 @@ RejectionFreePT <- function(steps,temps,GivenMatrix,h, swap_n){
       }
     }
 ### Second step: Try a swap of replicas
-    if(i %% swap_n ==0){ #Every swap_n we try a swap of replicas
+    if(i %% swap_n ==0 && i<steps){ #Every swap_n we try a swap of replicas, except in the very last iteration
       count_swaps <- count_swaps+1 #So next time we swap the replicas of different parity
                                   #########################################################      
       print(paste0('Trying replica swap #',count_swaps,' after ',i,' iterations'))
@@ -238,7 +238,7 @@ N=200 #Dimension of the QUBO problem
 n_steps= 1000000#Number of steps in every simulation
 n_swaps= 8000#After how many steps we try a swap
 NumRep <- 1000 #Number of times to repeat the simulation
-temps <- c(1,1 *1.29^(1:10)) #temperatures
+temps <- c(1,1 *1.1^(1:10)) #temperatures
 betas <- 1/temps #Inverse temperatures
 h_baseline <- rep('h_min',length(betas))
 h_m <- rep('h_max',length(betas))
@@ -250,7 +250,7 @@ iter_find <- matrix(NA,nrow=NumRep,ncol=4)
 colnames(iter_find) <- c('baseline','max','sq','balancing')
 max_energy <- matrix(NA,nrow=NumRep,ncol=4)
 colnames(max_energy) <- c('baseline','max','sq','balancing')
-swap_rates <- array(NA,dim=c(NumRep,4,length(temps)))
+swap_rates <- array(NA,dim=c(NumRep,4,length(temps)-1))
 round_trips <- matrix(NA,nrow=NumRep,ncol=4)
 colnames(round_trips) <- c('baseline','max','sq','balancing')
 
@@ -262,9 +262,9 @@ for(i in 1:NumRep){
   set.seed(i+321) #Use the same seed so both algorithms start at the same spot
   h_local <- h_baseline
   simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
-  iter_find[i,1] <- simPT[[3]]
-  max_energy[i,1] <- simPT[[2]][1]
-  check_rt <- RT_analysis(simPT[[4]])
+  iter_find[i,1] <- simPT[[3]] #Extract the number of simulation in which the maximum was identified
+  max_energy[i,1] <- simPT[[2]][1] #Extract the maximum energy identified
+  check_rt <- RT_analysis(simPT[[4]]) #Analyze the replica swapping path
   swap_rates[i,1,] <- check_rt[[1]]
   round_trips[i,1] <- check_rt[[3]]
   #Max
