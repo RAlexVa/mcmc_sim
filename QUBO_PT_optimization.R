@@ -8,7 +8,7 @@
 
 rm(list=ls())
 library(tidyverse)
-library(here)
+#library(here)
 library(igraph) #To create random adjacency matrix (for MaxCut)
 #setwd(here())
 setwd('..')
@@ -152,7 +152,7 @@ RT_analysis <- function(M){
 
 ## h is a vector, we define 1 balancing function for each replica (each temperature)
 RejectionFreePT <- function(steps,temps,GivenMatrix,h, swap_n){
-  #print('Starting RF-PT')
+  print('Starting RF-PT')
   # Create an array to store the states visited
   n_rep <- length(temps) #Number of replicas
   current_state <- matrix(NA,nrow=N,ncol=n_rep) #each column is a replica
@@ -167,9 +167,9 @@ RejectionFreePT <- function(steps,temps,GivenMatrix,h, swap_n){
   }
   for(i in 1:steps){ #Number of steps that each replica will take
                               #########################################################
-    # if(i %% floor(steps/4) ==0){
-    #   print(paste0('iteration # ',i," = ",round(100*i/steps,0),"%")) 
-    # }
+     if(i %% floor(steps/4) ==0){
+       print(paste0('iteration # ',i," = ",round(100*i/steps,0),"%")) 
+     }
 
 ### First step: Update the replicas
     for(k in 1:n_rep){
@@ -178,7 +178,6 @@ RejectionFreePT <- function(steps,temps,GivenMatrix,h, swap_n){
       Ans <- RF_Update_temp(GivenMatrix, current_state[,k], h=eval(parse(text=h[k])), beta=temps[k])
       current_state[,k] = Ans[[1]]
       Value = Ans[[2]]
-      #Print = c(Print, Value)
       if(max_energy[k] < Value) #New energy is bigger
       {
         max_energy[k] <-  Value
@@ -190,7 +189,7 @@ RejectionFreePT <- function(steps,temps,GivenMatrix,h, swap_n){
     if(i %% swap_n ==0){ #Every swap_n we try a swap of replicas
       count_swaps <- count_swaps+1 #So next time we swap the replicas of different parity
                                   #########################################################      
-      #print(paste0('Trying replica swap #',count_swaps,' after ',i,' iterations'))
+      print(paste0('Trying replica swap #',count_swaps,' after ',i,' iterations'))
       #print(dim(swap_log))
       #identify the replicas to swap (even or odd)
       swap_t <- 1:(n_rep-1)
@@ -256,7 +255,7 @@ round_trips <- matrix(NA,nrow=NumRep,ncol=4)
 colnames(round_trips) <- c('baseline','max','sq','balancing')
 
 for(i in 1:NumRep){
-  #print(paste0('repetition #',i))
+  print(paste0('repetition #',i))
   set.seed(i+321)
   MaxCut <- RandomMaxCutMatrix()
   #Baseline
