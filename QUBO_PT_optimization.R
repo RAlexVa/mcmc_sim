@@ -268,6 +268,7 @@ Sim_MaxCut_RF_PT <- function(dimension, n_steps, n_swaps, NumRep, betas, matrix_
   write.csv(max_energy,file=paste0('./results/',file_id,'max_energy_PT.csv'), row.names = F)
   write.csv(round_trips,file=paste0('./results/',file_id,'round_trips.csv'), row.names = F)
   write.csv(swap_rates,file=paste0('./results/',file_id,'swap_rates.csv'), row.names = F)
+  print(seed_s)
 }
 
 
