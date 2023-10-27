@@ -8,10 +8,8 @@
 
 rm(list=ls())
 library(tidyverse)
-#library(here)
 library(igraph) #To create random adjacency matrix (for MaxCut)
 #setwd(here())
-setwd('..')
 ###### Functions ########
 ### Create a random QUBO matrix
 RandomQuboMatrix <- function(std)     
@@ -221,84 +219,104 @@ h_min <- function(new,current){
 h_max <- function(new,current){
   return(max(0,new-current))}
 
-###### Simulations ########
-#Small simulation
-{
-  # set.seed(2510)
-  # N=10
-  # temps <- c(1,2,3,4,5,6)
-  # betas <- 1/temps
-  # h_baseline <- rep('h_min',length(betas))
-  # MaxCut <- RandomMaxCutMatrix()
-  # rev <- RejectionFreePT(10000,betas,MaxCut,h_baseline, 500)
+
+Sim_MaxCut_RF_PT <- function(dimension, n_steps, n_swaps, NumRep, betas, matrix_h){
+  #Matrix_h contains as many columns as betas
+  #as many rows as the number of balancing functions combinations we want to try
+  #Rows of the matrix_h should have the name of the model
+  N <- dimension
+  num_models <- nrow(matrix_h)
+  num_temps <- length(betas)
+  seed_s <- floor(runif(1)*1000) #Seed so that we can start each model in the same spot
+  if(length(betas)!= ncol(matrix_h)){
+    print('error in the dimension of betas and matrix_h')
+    return(NA)
+  }
+  #To store when the algorithm find the optimum
+  iter_find <- matrix(NA,nrow=NumRep,ncol=num_models)
+  colnames(iter_find) <- rownames(matrix_h)
+  #To store the maximum energy found
+  max_energy <- matrix(NA,nrow=NumRep,ncol=num_models)
+  colnames(max_energy) <- rownames(matrix_h)
+  #To store the replica swap rates
+  swap_rates <- array(NA,dim=c(NumRep,num_models,num_temps-1))
+  #To store the number of roundtrips
+  round_trips <- matrix(NA,nrow=NumRep,ncol=num_models)
+  colnames(round_trips) <- rownames(matrix_h)
+  
+  #Start the simulation
+  cat('Starting RF PT: \n Dim=',N,'\n# temps =',num_temps,'\n# models =',num_models,'\n# reps =',NumRep)
+  for(i in 1:NumRep){
+    print(paste0('repetition #',i))
+    set.seed(i+seed_s)
+    MaxCut <- RandomMaxCutMatrix()
+    for(m in 1:num_models){ #Each iteration repeat the simulation with same starting point for each model
+      h_local <- matrix_h[m,] #Choose model m
+      set.seed(i+seed_s) #Use the same seed so both algorithms start at the same spot
+      simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
+      #Store results
+      iter_find[i,1] <- simPT[[3]] #Extract the number of simulation in which the maximum was identified
+      max_energy[i,1] <- simPT[[2]][1] #Extract the maximum energy identified
+      check_rt <- RT_analysis(simPT[[4]]) #Analyze the replica swapping path
+      swap_rates[i,1,] <- check_rt[[1]] #Extract the swap rates
+      round_trips[i,1] <- check_rt[[3]] #Calclulate the number of roundtrips
+    }
+  }
+  file_id <- paste0(Sys.Date(),'_',seed_s)
+  #Export the results
+  write.csv(iter_find,file=paste0('./results/',file_id,'iteration_find.csv'), row.names = F)
+  write.csv(max_energy,file=paste0('./results/',file_id,'max_energy_PT.csv'), row.names = F)
+  write.csv(round_trips,file=paste0('./results/',file_id,'round_trips.csv'), row.names = F)
+  write.csv(swap_rates,file=paste0('./results/',file_id,'swap_rates.csv'), row.names = F)
 }
 
-#Big simulation
-N=200 #Dimension of the QUBO problem
-n_steps= 1000000#Number of steps in every simulation
-n_swaps= 8000#After how many steps we try a swap
-NumRep <- 1000 #Number of times to repeat the simulation
-temps <- c(1,1 *1.1^(1:10)) #temperatures
-betas <- 1/temps #Inverse temperatures
-h_baseline <- rep('h_min',length(betas))
-h_m <- rep('h_max',length(betas))
-h_2 <- rep('h_sq',length(betas))
-h_balancing <- c(rep('h_sq',5),rep('h_max',6))
 
 
-iter_find <- matrix(NA,nrow=NumRep,ncol=4)
-colnames(iter_find) <- c('baseline','max','sq','balancing')
-max_energy <- matrix(NA,nrow=NumRep,ncol=4)
-colnames(max_energy) <- c('baseline','max','sq','balancing')
-swap_rates <- array(NA,dim=c(NumRep,4,length(temps)-1))
-round_trips <- matrix(NA,nrow=NumRep,ncol=4)
-colnames(round_trips) <- c('baseline','max','sq','balancing')
 
-for(i in 1:NumRep){
-  print(paste0('repetition #',i))
-  set.seed(i+321)
-  MaxCut <- RandomMaxCutMatrix()
-  #Baseline
-  set.seed(i+321) #Use the same seed so both algorithms start at the same spot
-  h_local <- h_baseline
-  simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
-  iter_find[i,1] <- simPT[[3]] #Extract the number of simulation in which the maximum was identified
-  max_energy[i,1] <- simPT[[2]][1] #Extract the maximum energy identified
-  check_rt <- RT_analysis(simPT[[4]]) #Analyze the replica swapping path
-  swap_rates[i,1,] <- check_rt[[1]]
-  round_trips[i,1] <- check_rt[[3]]
-  #Max
-  set.seed(i+321) #Use the same seed so both algorithms start at the same spot
-  h_local <- h_m
-  simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
-  iter_find[i,2] <- simPT[[3]]
-  max_energy[i,2] <- simPT[[2]][1]
-  check_rt <- RT_analysis(simPT[[4]])
-  swap_rates[i,2,] <- check_rt[[1]]
-  round_trips[i,2] <- check_rt[[3]]
-  #Squared root
-  set.seed(i+321) #Use the same seed so both algorithms start at the same spot
-  h_local <- h_2
-  simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
-  iter_find[i,3] <- simPT[[3]]
-  max_energy[i,3] <- simPT[[2]][1]
-  check_rt <- RT_analysis(simPT[[4]])
-  swap_rates[i,3,] <- check_rt[[1]]
-  round_trips[i,3] <- check_rt[[3]]
-  #Balancing
-  set.seed(i+321) #Use the same seed so both algorithms start at the same spot
-  h_local <- h_balancing
-  simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
-  iter_find[i,4] <- simPT[[3]]
-  max_energy[i,4] <- simPT[[2]][1]
-  check_rt <- RT_analysis(simPT[[4]])
-  swap_rates[i,4,] <- check_rt[[1]]
-  round_trips[i,4] <- check_rt[[3]]
-}
 
-swap_r_summary <- rbind(swap_rates[,1,],swap_rates[,2,],swap_rates[,3,],swap_rates[,4,])
+# for(i in 1:NumRep){
+#   print(paste0('repetition #',i))
+#   set.seed(i+321)
+#   MaxCut <- RandomMaxCutMatrix()
+#   #Baseline
+#   set.seed(i+321) #Use the same seed so both algorithms start at the same spot
+#   h_local <- h_baseline
+#   simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
+#   iter_find[i,1] <- simPT[[3]] #Extract the number of simulation in which the maximum was identified
+#   max_energy[i,1] <- simPT[[2]][1] #Extract the maximum energy identified
+#   check_rt <- RT_analysis(simPT[[4]]) #Analyze the replica swapping path
+#   swap_rates[i,1,] <- check_rt[[1]]
+#   round_trips[i,1] <- check_rt[[3]]
+#   #Max
+#   set.seed(i+321) #Use the same seed so both algorithms start at the same spot
+#   h_local <- h_m
+#   simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
+#   iter_find[i,2] <- simPT[[3]]
+#   max_energy[i,2] <- simPT[[2]][1]
+#   check_rt <- RT_analysis(simPT[[4]])
+#   swap_rates[i,2,] <- check_rt[[1]]
+#   round_trips[i,2] <- check_rt[[3]]
+#   #Squared root
+#   set.seed(i+321) #Use the same seed so both algorithms start at the same spot
+#   h_local <- h_2
+#   simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
+#   iter_find[i,3] <- simPT[[3]]
+#   max_energy[i,3] <- simPT[[2]][1]
+#   check_rt <- RT_analysis(simPT[[4]])
+#   swap_rates[i,3,] <- check_rt[[1]]
+#   round_trips[i,3] <- check_rt[[3]]
+#   #Balancing
+#   set.seed(i+321) #Use the same seed so both algorithms start at the same spot
+#   h_local <- h_balancing
+#   simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
+#   iter_find[i,4] <- simPT[[3]]
+#   max_energy[i,4] <- simPT[[2]][1]
+#   check_rt <- RT_analysis(simPT[[4]])
+#   swap_rates[i,4,] <- check_rt[[1]]
+#   round_trips[i,4] <- check_rt[[3]]
+# }
+# 
+# swap_r_summary <- rbind(swap_rates[,1,],swap_rates[,2,],swap_rates[,3,],swap_rates[,4,])
+
+
 ##### Exporting data #####
-write.csv(iter_find,file='./results/iteration_find_max_PT_compare.csv', row.names = F)
-write.csv(max_energy,file='./results/max_energy_PT_compare.csv', row.names = F)
-write.csv(round_trips,file='./results/round_trips_PT_compare.csv', row.names = F)
-write.csv(swap_r_summary,file='./results/swap_rates_PT_compare.csv', row.names = F)
