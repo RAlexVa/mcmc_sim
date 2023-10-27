@@ -6,7 +6,7 @@
 ####
 
 
-rm(list=ls())
+#rm(list=ls())
 library(tidyverse)
 library(igraph) #To create random adjacency matrix (for MaxCut)
 #setwd(here())
@@ -150,7 +150,7 @@ RT_analysis <- function(M){
 
 ## h is a vector, we define 1 balancing function for each replica (each temperature)
 RejectionFreePT <- function(steps,temps,GivenMatrix,h, swap_n){
-  print('Starting RF-PT')
+  #print('Starting RF-PT')
   # Create an array to store the states visited
   n_rep <- length(temps) #Number of replicas
   current_state <- matrix(NA,nrow=N,ncol=n_rep) #each column is a replica
@@ -239,27 +239,27 @@ Sim_MaxCut_RF_PT <- function(dimension, n_steps, n_swaps, NumRep, betas, matrix_
   max_energy <- matrix(NA,nrow=NumRep,ncol=num_models)
   colnames(max_energy) <- rownames(matrix_h)
   #To store the replica swap rates
-  swap_rates <- array(NA,dim=c(NumRep,num_models,num_temps-1))
+  swap_rates <- array(-1,dim=c(NumRep,num_models,num_temps-1))
   #To store the number of roundtrips
   round_trips <- matrix(NA,nrow=NumRep,ncol=num_models)
   colnames(round_trips) <- rownames(matrix_h)
   
   #Start the simulation
-  cat('Starting RF PT: \n Dim=',N,'\n# temps =',num_temps,'\n# models =',num_models,'\n# reps =',NumRep)
+  cat('Starting RF PT: \n Dim=',N,'\n# temps =',num_temps,'\n# models =',num_models,'\n# reps =',NumRep,'\n')
   for(i in 1:NumRep){
-    print(paste0('repetition #',i))
     set.seed(i+seed_s)
     MaxCut <- RandomMaxCutMatrix()
     for(m in 1:num_models){ #Each iteration repeat the simulation with same starting point for each model
+      print(paste0('repetition #',i,', model ',m))
       h_local <- matrix_h[m,] #Choose model m
       set.seed(i+seed_s) #Use the same seed so both algorithms start at the same spot
       simPT <- RejectionFreePT(steps=n_steps,temps=betas,GivenMatrix=MaxCut,h=h_local,swap_n=n_swaps)
       #Store results
-      iter_find[i,1] <- simPT[[3]] #Extract the number of simulation in which the maximum was identified
-      max_energy[i,1] <- simPT[[2]][1] #Extract the maximum energy identified
+      iter_find[i,m] <- simPT[[3]] #Extract the number of simulation in which the maximum was identified
+      max_energy[i,m] <- simPT[[2]][1] #Extract the maximum energy identified
       check_rt <- RT_analysis(simPT[[4]]) #Analyze the replica swapping path
-      swap_rates[i,1,] <- check_rt[[1]] #Extract the swap rates
-      round_trips[i,1] <- check_rt[[3]] #Calclulate the number of roundtrips
+      swap_rates[i,m,] <- check_rt[[1]]$acc_rate #Extract the swap rates
+      round_trips[i,m] <- check_rt[[3]] #Calculate the number of round trips
     }
   }
   file_id <- paste0(Sys.Date(),'_',seed_s)
