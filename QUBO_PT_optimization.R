@@ -24,7 +24,7 @@ RandomMaxCutMatrix <- function(p=0.5)
   #https://r.igraph.org/index.html
   temp <- sample_gnp(N,p)
   adjmat <- temp[]
-  diag(adjmat) <- -1* adjmat%*%rep(1,N) #to obtain the values for the diagonals
+  diag(adjmat) <- as.matrix(-1* adjmat%*%rep(1,N)) #to obtain the values for the diagonals
   return(-1*adjmat)
 }
 
