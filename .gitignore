@@ -6,3 +6,5 @@
 *.pper
 *.jpeg
 /simulation results
+*.xlsx
+*.xls
