@@ -18,6 +18,8 @@
 ##### AID FUNCTION #####
 # return uniform distribution for the specified neighbors
 #Q(i,j) ∝ 1
+#Option 1: Use parameter nbr to define specific neighbors to consider 
+#Option 2: Use adj to define the number of adjacent neighbors (to the current state i) to consider
 Q_unif <- function(i,S, adj=0, nbr=NA){
   #Returns neighbors and uniform distribution over those neighbors
   if(!all(is.na(nbr))){
@@ -39,7 +41,7 @@ Q_unif <- function(i,S, adj=0, nbr=NA){
           index <- which(i==S) - 1 #index of the current state
           adj_index <- c(-adj:-1,1:adj)
           neighbors <- S[(adj_index + index)%%(length(S)) + 1]
-          neighbors <- unique(neighbors[neighbors != i]) #In case the # of adjacent neighbors is too big
+          neighbors <- unique(neighbors[neighbors != i]) #using unique in case the # of adjacent neighbors is too big
         }
         #uniform proposal distribution
         n_size <- length(neighbors)
@@ -91,8 +93,8 @@ PNS_unbiased <- function(S,initial,M,L,pi,Q,nbr_func){
     if(sum(multi) + L >=M){l_count <- M-sum(multi); last <- TRUE}
     while(l_count >0){ #loop for changing PNSets
       i <- i+1
-      neighbors <- nbr_func(state[i]) #calculate neigborhoods of current state
-      PNSet <- neighbors[[(n_count%%length(neighbors))+1]] #Select the negihborhood depending on L
+      neighbors <- nbr_func(state[i]) #calculate neighborhoods of current state
+      PNSet <- neighbors[[(n_count%%length(neighbors))+1]] #Select the neighborhood depending on L
       esc_p <- alpha_pns(state[i],S,pi,Q,nbr=PNSet) #Obtain the escape probability and the transition prob for the partial neighbors
       s_rep <- 1 + rgeom(1,sum(esc_p[,2])) #Get the multiplicity for the current state
       if(s_rep>=l_count){ #Stop when you get L samples from that neighborhood
