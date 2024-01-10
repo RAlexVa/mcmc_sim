@@ -1,13 +1,14 @@
 rm(list=ls())
-set.seed(123)
+defseed <- 123
+set.seed(defseed)
 S <- 1:10 #State space
 #bimodal target distribution with 4 states between each modes
 pi <- c(1,1,6,rep(1,4),6,1,1) #bimodal target distribution
 true_pi <- pi/sum(pi)
 
 #source('MH_function.r')
-source('RF_function.r')
-source('PNS_unbiased_function.r')
+source('functions/RF_function.r')
+source('functions/PNS_unbiased_function.r')
 
 #Parameters
 B <- 50 #Burn-in
@@ -62,6 +63,8 @@ result <- as.data.frame(cbind(tvd_sum_mh,time_sum_mh))
 colnames(result) <- c(paste0('TVD Q',1:length(dist_q)),paste0('Time Q',1:length(dist_q)))
 rownames(result) <- paste0("S=",M)
 result <- rbind(result,c('Q1 unif on all neighbors', paste0('Q',2:5,' unif on ',1:4,' adjacent neighbors on each side'),rep(NA,length(dist_q))))
+#Add details on the simulation
+result <- rbind(result,c(paste0('Burn-in=',B),paste0('Simulations=',N),paste0('seed=',defseed),paste0('dist=',paste(pi,collapse=',')),rep(NA,6)))
 write.csv(result,paste0("simulation results/RF_sim_",Sys.Date(),".csv"))
 if(length(no_sample)>0){write.csv(no_sample,paste0("simulation results/RF_no sample_",Sys.Date(),".csv"),row.names = F)}
 
