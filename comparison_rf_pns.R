@@ -53,7 +53,7 @@ for(n in 1:N){ #number of simulations
       tvd[n,m,q] <- 0.5*sum(abs(true_pi - est_prob))
     }
   }
-  if(n%%10==0){print(paste("first",n,"simulations"))}
+  if(n%%10==0){print(paste("first",n,"simulations of",N))}
 }
 
 tvd_sum_mh <- apply(tvd,c(2,3),sum)/length(tvd[,1,1])
@@ -142,7 +142,7 @@ for(n in 1:N){ #number of simulations
       PNS_tvd[n,m,q] <- 0.5*sum(abs(true_pi - est_prob))
     }
   }
-  if(n%%10==0){print(paste("first",n,"simulations"))}
+  if(n%%10==0){print(paste("first",n,"simulations of",N))}
 }
 
 tvd_sum_mh <- apply(PNS_tvd,c(2,3),sum)/length(PNS_tvd[,1,1])
