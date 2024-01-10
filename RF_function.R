@@ -13,65 +13,10 @@
 # mul is the multiplicity
 # sample is the state corresponding to that multiplicity
 
-##### AID FUNCTION #####
-# return uniform distribution for the specified neighbors
-#Q(i,j) ∝ 1
-Q_unif <- function(i,S, adj=0, nbr=NA){
-  #Returns neighbors and uniform distribution over those neighbors
-  if(!all(is.na(nbr))){
-    if(!all(nbr %in% S)){
-      print("some of the specified neighbors are not in S");return(NA)
-    }else{
-      neighbors <- nbr[nbr!=i]
-      n_size <- length(neighbors)
-      prob <- rep(1/n_size,n_size)
-      return(cbind(neighbors,prob))
-    }
-    
-  }else{
-    if(!(i %in% S)){print(paste("State",i,"is not in S"));return(NA)}else{#Check that state i is in S
-      if(adj < 0){print("adj parameter must be non-negative"); return(NA)}else{
-        if(adj == 0){ #Consider all neighbors
-          neighbors <- S[S!=i]
-        }else{ #Consider the number of adjacent neighbors defined by adj
-          index <- which(i==S) - 1 #index of the current state
-          adj_index <- c(-adj:-1,1:adj)
-          neighbors <- S[(adj_index + index)%%(length(S)) + 1]
-          neighbors <- unique(neighbors[neighbors != i]) #In case the # of adjacent neighbors is too big
-        }
-        #uniform proposal distribution
-        n_size <- length(neighbors)
-        prob <- rep(1/n_size,n_size)
-        return(cbind(neighbors,prob))
-      }
-    }
-  }
-}
+##### AID FUNCTIONS #####
+source('functions/Q_unif.R')
+source('functions/alpha_p.R')
 
-##### AID FUNCTION #####
-#Function to calculate the probability of escaping a state
-#INPUT
-# x: state to calculate escape probability
-# S: state space
-# pi: target distribution
-# Q: (function) proposal distribution
-#OUTPUT
-# Matrix
-# 1st column is the neighbor
-# 2nd column is the ptobability of moving from state X to the state in that row
-alpha_p <- function(x,S,pi,Q){
-  n_x <- Q(x,S)
-  p_esc <- matrix(NA,ncol=2)
-  for(y in n_x[,1]){
-    n_y <- Q(y,S)
-    index_x <- which(n_y[,1]==x)
-    index_y <- which(n_x[,1]==y)
-    prob <- n_x[index_y,2]*min(1,(pi[y]*n_y[index_x,2])/(pi[x]*n_x[index_y,2]))
-    p_esc <- rbind(p_esc,c(y,prob))
-  }
-  p_esc <- p_esc[-1,]
-  return(p_esc) 
-}
 
 ##### FUNCTION #####
 mh_jump <- function(S,initial,B,M,pi,Q){
