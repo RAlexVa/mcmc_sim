@@ -29,9 +29,9 @@ diag(Q3) <- 0
 
 
 ##### IMPORTING FUNCTIONS FOR SIMULATION #####
-source('metropolishastings_function.R')
+source('functions/MH_function.R')
 source('rejectionfree_mh_function.R')
-source('paralleltemp_function.R')
+source('functions/paralleltemp_function.R')
 
 ##### Measuring performance ##### 
 set.seed(123)
