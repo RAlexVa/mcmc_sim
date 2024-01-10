@@ -17,37 +17,7 @@ N <- 200 #number of times to repeat the experiment
 ##### Simulation Rejection Free #####
 
 #Distribution functions to consider
-Q_unif <- function(i,S, adj=0, nbr=NA){
-  #Returns neighbors and uniform distribution over those neighbors
-  if(!all(is.na(nbr))){ #If a list of neighbors is specified
-    if(!all(nbr %in% S)){
-      print("some of the specified neighbors are not in S");return(NA)
-    }else{
-      neighbors <- nbr[nbr!=i]
-      n_size <- length(neighbors)
-      prob <- rep(1/n_size,n_size)
-      return(cbind(neighbors,prob))
-    }
-    
-  }else{
-    if(!(i %in% S)){print(paste("State",i,"is not in S"));return(NA)}else{#Check that state i is in S
-      if(adj < 0){print("adj parameter must be non-negative"); return(NA)}else{
-        if(adj == 0){ #Consider all neighbors
-          neighbors <- S[S!=i]
-        }else{ #Consider the number of adjacent neighbors defined by adj
-          index <- which(i==S) - 1 #index of the current state
-          adj_index <- c(-adj:-1,1:adj)
-          neighbors <- S[(adj_index + index)%%(length(S)) + 1]
-          neighbors <- unique(neighbors[neighbors != i]) #In case the # of adjacent neighbors is too big
-        }
-        #uniform proposal distribution
-        n_size <- length(neighbors)
-        prob <- rep(1/n_size,n_size)
-        return(cbind(neighbors,prob))
-      }
-    }
-  }
-} #uniform on all neighbors
+source('functions/Q_unif.R')
 Q1 <- function(i,S){Q_unif(i,S,1)} #Uniform considering only 1 adjacent neighbor on each side
 Q2 <- function(i,S){Q_unif(i,S,2)} #Uniform considering x adjacent neighbors on each side
 Q3 <- function(i,S){Q_unif(i,S,3)}
