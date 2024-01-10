@@ -29,8 +29,8 @@ diag(Q3) <- 0
 
 
 ##### IMPORTING FUNCTIONS FOR SIMULATION #####
-source('functions/MH_function.R')
-source('rejectionfree_mh_function.R')
+source('functions/MH_matrix_function.R')
+source('functions/RF_matrix_function.R')
 source('functions/paralleltemp_function.R')
 
 ##### Measuring performance ##### 
