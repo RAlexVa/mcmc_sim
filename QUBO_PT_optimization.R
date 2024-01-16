@@ -2,7 +2,7 @@
 # Code to optimize a QUBO problem with dimension N using parallel tempering
 # We use uniform proposal distributions
 # We can use different balancing functions
-# Mostly using prvious code from Sigeng Chen
+# Mostly using previous code from Sigeng Chen
 ####
 
 
