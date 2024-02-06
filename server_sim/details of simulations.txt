@@ -1,0 +1,29 @@
+v1_______________________________
+N=100 #Dimension of the QUBO problem
+n_steps= 100000#Number of steps in every simulation
+n_swaps= 500#After how many steps we try a swap
+NumRep <- 1000 #Number of times to repeat the simulation
+temps <- c(1,1 *1.09^(1:10)) #temperatures
+****** lo matamos el 23 de Nov porque solo iba en la repeticion 53 de 1000
+
+V2__________________________
+N=200 #Dimension of the QUBO problem
+n_steps= 1000000#Number of steps in every simulation
+n_swaps= 8000#After how many steps we try a swap
+NumRep <- 1000 #Number of times to repeat the simulation
+temps <- c(1,1 *1.09^(1:10)) #temperatures
+********** creo que dimension 200 es un poco grande
+V3__________________________
+N=100 #Dimension of the QUBO problem
+n_steps= 100000#Number of steps in every simulation
+n_swaps= 500#After how many steps we try a swap
+NumRep <- 5000 #Number of times to repeat the simulation
+temps <- c(1,1 *1.09^(1:10)) #temperatures
+******** tambien lo matamos el 23 noviembre
+
+V4__________________________
+N=50 #Dimension of the QUBO problem
+n_steps= 10000#Number of steps in every simulation
+n_swaps= 100#After how many steps we try a swap
+NumRep <- 1000 #Number of times to repeat the simulation
+temps <- c(1,1 *1.09^(1:10)) #temperatures
