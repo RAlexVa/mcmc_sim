@@ -1,7 +1,9 @@
 #rm(list=ls())
 semilla <- 1546
 S <- 100
-
+color_lines <- 'gray35'
+chart_type <- 'hist'
+#chart_type <- 'line'
 ##### Summarize findings #####
 library(tidyverse)
 library(Hmisc)
@@ -48,27 +50,28 @@ for(i in 1:nrow(pi)){
     summarise(hit=mean(hit),mode_global=mean(mode_global),mode_local=mean(mode_local)) |> 
     filter(pi==as.character(i)) 
 
-jpeg(paste("plots/hr",S,semilla,"pi",i,"1.jpg",sep='_'), width = 1305, height = 326) 
-# Histogram
-# plot_sum <-  dummy |> filter(h %in%c('min','max','sq')) |> 
-#     ggplot(aes(x=x0,
-#                y=hit))+
-#     geom_bar(stat = 'identity')+
-#     geom_bar(#data = dummy,
-#              aes(x=x0,
-#                  y=mode_global,fill='red'),stat = 'identity',show.legend = FALSE)+
-#     geom_bar(#data = dummy,
-#              aes(x=x0,
-#                  y=mode_local,fill='blue'),stat = 'identity',show.legend = FALSE)+
-#     facet_wrap(~h)+ #facet_wrap(~pi+h)+
-#     labs(y='Hit rate', x='Initial state', title=paste0('Hit rate by initial state, ','Pi ',i))+
-#     theme_minimal()
-  
-  # Line plot
-  ##################################
-  plot_sum <- dummy|> filter(h %in%c('min','max','sq')) |> 
+jpeg(paste("plots/hr",S,semilla,"pi",i,"1.jpg",sep='_'), width = 1305, height = 326)
+if(chart_type=='hist'){
+# Histogram ##################################
+plot_sum <-  dummy |> filter(h %in%c('min','max','sq')) |>
+    ggplot(aes(x=x0,
+               y=hit))+
+    geom_bar(stat = 'identity')+
+    geom_bar(#data = dummy,
+             aes(x=x0,
+                 y=mode_global,fill='red'),stat = 'identity',show.legend = FALSE)+
+    geom_bar(#data = dummy,
+             aes(x=x0,
+                 y=mode_local,fill='blue'),stat = 'identity',show.legend = FALSE)+
+    facet_wrap(~h)+ #facet_wrap(~pi+h)+
+    labs(y='Hit rate', x='Initial state', title=paste0('Hit rate by initial state, ','Pi ',i))+
+    theme_minimal()
+}  
+if(chart_type=='line'){
+# Line plot ##################################
+plot_sum <- dummy|> filter(h %in%c('min','max','sq')) |> 
     ggplot(aes(x=x0,ymin=0,ymax=hit))+
-    geom_linerange()+
+    geom_linerange(color=color_lines)+
     geom_linerange(
       aes(x=x0,
           ymin=0,ymax=mode_global,color='red'),show.legend = FALSE)+
@@ -78,32 +81,33 @@ jpeg(paste("plots/hr",S,semilla,"pi",i,"1.jpg",sep='_'), width = 1305, height = 
     facet_wrap(~h)+ #facet_wrap(~pi+h)+
     labs(y='ItS', x='Initial state', title=paste0('ItS by initial state, ','Pi ',i))+
     theme_minimal()
-  #################################
+}
   show(plot_sum)
 dev.off()
-  #Second part
+### Second part ################################## 
 
 jpeg(paste("plots/hr",S,semilla,"pi",i,"2.jpg",sep='_'), width = 1305, height = 326) 
-
-# Histogram
-# plot_sum <-  dummy |> filter(h %in%c('a/1+a','a+1')) |>  
-#     ggplot(aes(x=x0,
-#                y=hit))+
-#     geom_bar(stat = 'identity')+
-#     geom_bar(#data = dummy,
-#              aes(x=x0,
-#                  y=mode_global,fill='red'),stat = 'identity',show.legend = FALSE)+
-#     geom_bar(#data = dummy,
-#              aes(x=x0,
-#                  y=mode_local,fill='blue'),stat = 'identity',show.legend = FALSE)+
-#     facet_wrap(~h)+ #facet_wrap(~pi+h)+
-#     labs(y='Hit rate', x='Initial state', title=paste0('Hit rate by initial state, ','Pi ',i))+
-#     theme_minimal()
-# Line plot
-##################################
+if(chart_type=='hist'){
+# Histogram ##################################
+plot_sum <-  dummy |> filter(h %in%c('a/1+a','a+1')) |>
+    ggplot(aes(x=x0,
+               y=hit))+
+    geom_bar(stat = 'identity')+
+    geom_bar(#data = dummy,
+             aes(x=x0,
+                 y=mode_global,fill='red'),stat = 'identity',show.legend = FALSE)+
+    geom_bar(#data = dummy,
+             aes(x=x0,
+                 y=mode_local,fill='blue'),stat = 'identity',show.legend = FALSE)+
+    facet_wrap(~h)+ #facet_wrap(~pi+h)+
+    labs(y='Hit rate', x='Initial state', title=paste0('Hit rate by initial state, ','Pi ',i))+
+    theme_minimal()
+}
+if(chart_type=='line'){
+# Line plot ##################################
 plot_sum <- dummy|> filter(h %in%c('a/1+a','a+1')) |> 
   ggplot(aes(x=x0,ymin=0,ymax=hit))+
-  geom_linerange()+
+  geom_linerange(color=color_lines)+
   geom_linerange(
     aes(x=x0,
         ymin=0,ymax=mode_global,color='red'),show.legend = FALSE)+
@@ -113,7 +117,7 @@ plot_sum <- dummy|> filter(h %in%c('a/1+a','a+1')) |>
   facet_wrap(~h)+ #facet_wrap(~pi+h)+
   labs(y='ItS', x='Initial state', title=paste0('ItS by initial state, ','Pi ',i))+
   theme_minimal()
-#################################
+}
   show(plot_sum)
 dev.off()
 }
@@ -126,28 +130,28 @@ for(i in 1:nrow(pi)){
     filter(hit==1) |> #Only instances where the global optimum was reached
     group_by(x0, pi, h, mode_global,mode_local) |> 
     summarise(its=mean(its), g_mode=max(mode_global)*its, l_mode=max(mode_local)*its) 
-jpeg(paste("plots/its",S,semilla,"pi",i,"1.jpg",sep='_'), width = 1305, height = 326) 
-# Histogram
-  # plot_sum <-  dummy|> filter(h %in%c('min','max','sq')) |> 
-  #   ggplot(aes(x=x0,
-  #              y=its))+
-  #   geom_bar(stat = 'identity')+
-  #   geom_bar(#data = dummy,
-  #     aes(x=x0,
-  #         y=g_mode,fill='red'),stat = 'identity',show.legend = FALSE)+
-  #   geom_bar(#data = dummy,
-  #     aes(x=x0,
-  #         y=l_mode,fill='blue'),stat = 'identity',show.legend = FALSE)+
-  #   facet_wrap(~h)+ #facet_wrap(~pi+h)+
-  #   labs(y='ItS', x='Initial state', title=paste0('ItS by initial state, ','Pi ',i))+
-  #   theme_minimal()
-
-
-# Line plot
-##################################  
+jpeg(paste("plots/its",S,semilla,"pi",i,"1.jpg",sep='_'), width = 1305, height = 326)
+if(chart_type=='hist'){
+# Histogram ################################## 
+  plot_sum <-  dummy|> filter(h %in%c('min','max','sq')) |>
+    ggplot(aes(x=x0,
+               y=its))+
+    geom_bar(stat = 'identity')+
+    geom_bar(#data = dummy,
+      aes(x=x0,
+          y=g_mode,fill='red'),stat = 'identity',show.legend = FALSE)+
+    geom_bar(#data = dummy,
+      aes(x=x0,
+          y=l_mode,fill='blue'),stat = 'identity',show.legend = FALSE)+
+    facet_wrap(~h)+ #facet_wrap(~pi+h)+
+    labs(y='ItS', x='Initial state', title=paste0('ItS by initial state, ','Pi ',i))+
+    theme_minimal()
+}
+if(chart_type=='line'){
+# Line plot ################################## 
 plot_sum <- dummy|> filter(h %in%c('min','max','sq')) |> 
     ggplot(aes(x=x0,ymin=0,ymax=its))+
-    geom_linerange()+
+    geom_linerange(color=color_lines)+
     geom_linerange(
       aes(x=x0,
           ymin=0,ymax=g_mode,color='red'),show.legend = FALSE)+
@@ -157,34 +161,34 @@ plot_sum <- dummy|> filter(h %in%c('min','max','sq')) |>
     facet_wrap(~h)+ #facet_wrap(~pi+h)+
     labs(y='ItS', x='Initial state', title=paste0('ItS by initial state, ','Pi ',i))+
     theme_minimal()
-  #################################
+}
 show(plot_sum)
 dev.off()
-  
-  # Second part
+
+### Second part ################################## 
   
 jpeg(paste("plots/its",S,semilla,"pi",i,"2.jpg",sep='_'), width = 1305, height = 326) 
-# Histogram
-  # plot_sum <-  dummy|> filter(h %in% c('a/1+a','a+1')) |> 
-  #   ggplot(aes(x=x0,
-  #              y=its))+
-  #   geom_bar(stat = 'identity')+
-  #   geom_bar(#data = dummy,
-  #     aes(x=x0,
-  #         y=g_mode,fill='red'),stat = 'identity',show.legend = FALSE)+
-  #   geom_bar(#data = dummy,
-  #     aes(x=x0,
-  #         y=l_mode,fill='blue'),stat = 'identity',show.legend = FALSE)+
-  #   facet_wrap(~h)+ #facet_wrap(~pi+h)+
-  #   labs(y='ItS', x='Initial state', title=paste0('ItS rate by initial state, ','Pi ',i))+
-  #   theme_minimal()
-
-  
-  # Line plot
-  ##################################  
+if(chart_type=='hist'){
+# Histogram ################################## 
+plot_sum <-  dummy|> filter(h %in% c('a/1+a','a+1')) |>
+    ggplot(aes(x=x0,
+               y=its))+
+    geom_bar(stat = 'identity')+
+    geom_bar(#data = dummy,
+      aes(x=x0,
+          y=g_mode,fill='red'),stat = 'identity',show.legend = FALSE)+
+    geom_bar(#data = dummy,
+      aes(x=x0,
+          y=l_mode,fill='blue'),stat = 'identity',show.legend = FALSE)+
+    facet_wrap(~h)+ #facet_wrap(~pi+h)+
+    labs(y='ItS', x='Initial state', title=paste0('ItS rate by initial state, ','Pi ',i))+
+    theme_minimal()
+}
+if(chart_type=='line'){ 
+# Line plot ################################## 
 plot_sum <- dummy|> filter(h %in%c('a/1+a','a+1')) |> 
     ggplot(aes(x=x0,ymin=0,ymax=its))+
-    geom_linerange()+
+    geom_linerange(color=color_lines)+
     geom_linerange(
       aes(x=x0,
           ymin=0,ymax=g_mode,color='red'),show.legend = FALSE)+
@@ -194,12 +198,13 @@ plot_sum <- dummy|> filter(h %in%c('a/1+a','a+1')) |>
     facet_wrap(~h)+ #facet_wrap(~pi+h)+
     labs(y='ItS', x='Initial state', title=paste0('ItS by initial state, ','Pi ',i))+
     theme_minimal()
-  #################################  
+}
 show(plot_sum)
 dev.off()
 }
 
 ### General Summary ###
+{
 #ItS
 jpeg(paste("plots/its",S,semilla,"all pi.jpg",sep='_'), width = 1305, height = 326) 
 plot_sum <- its |> 
@@ -228,5 +233,5 @@ plot_sum <-its |>
   theme(plot.title = element_text(hjust = 0.5))
 show(plot_sum)
 dev.off()
-
+}
   
